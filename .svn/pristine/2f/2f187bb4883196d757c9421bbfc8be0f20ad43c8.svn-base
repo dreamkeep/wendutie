@@ -1,0 +1,93 @@
+;============================================
+;                  声明
+; 该程序仅供参考若程序中存在疏漏， 
+; 芯海科技有限公司对此不承担任何责任。
+; (C)Shenzhen Chipsea Technologies Co.,Ltd
+;============================================
+; filename: define_ram.asm
+; author  : CS0155
+; date    : 2017-06-14
+; v1.0
+;============================================
+
+;============================================
+; PAGE0	前面128个RAM的分布 80H~FFH
+;--------------------------------------------
+
+;--------------------------------------------
+;   中断用到的变量
+;--------------------------------------------
+R_RAM_ALC_INT_S		equ  80h
+R_RAM_ALC_INT_E		equ  R_RAM_ALC_INT_S+2
+
+;--------------------------------------------
+;   中断用到的变量
+;--------------------------------------------
+R_Flag_Sys			equ	 83h
+	B_AD_30MS			equ		0
+
+;--------------------------------------------
+;   临时变量
+;--------------------------------------------
+R_TEMP0				equ	 84h
+R_TEMP1				equ	 85h
+R_TEMP2				equ	 86h
+R_TEMP3				equ	 87h
+R_TEMP4				equ	 88h
+R_TEMP5				equ	 89h
+
+
+
+	
+;--------------------------------------------
+; 分配到CS_Application_Proc.asm的RAM地址和大小
+;--------------------------------------------
+; private
+R_ALC_Application_S		equ	  d0h
+R_ALC_Application_E		equ	  R_ALC_Application_S+9
+
+
+
+
+;--------------------------------------------
+;   PAGE0	后面256个RAM的分布 100H~1FFH
+;--------------------100h--------------------
+;--------------------------------------------
+; A、B、C缓存的RAM地址（特殊）
+;--------------------------------------------
+; 由于是公共变量，
+; 该变量应用的函数范围是最底层函数，且不能在中断被调用
+; 该变量不能在中断使用
+R_SYS_ABC_S			equ  100h
+R_SYS_A_S			equ	 R_SYS_ABC_S+0
+R_SYS_A0			equ	 R_SYS_ABC_S+0
+R_SYS_A1			equ  R_SYS_ABC_S+1
+R_SYS_A2			equ  R_SYS_ABC_S+2
+R_SYS_A3			equ	 R_SYS_ABC_S+3
+R_SYS_A4			equ  R_SYS_ABC_S+4
+R_SYS_A5			equ  R_SYS_ABC_S+5
+
+R_SYS_B_S			equ	 R_SYS_ABC_S+6
+R_SYS_B0			equ	 R_SYS_ABC_S+6
+R_SYS_B1			equ  R_SYS_ABC_S+7
+R_SYS_B2			equ  R_SYS_ABC_S+8
+
+R_SYS_C_S			equ	 R_SYS_ABC_S+9
+R_SYS_C0			equ	 R_SYS_ABC_S+9
+R_SYS_C1			equ  R_SYS_ABC_S+10
+R_SYS_C2			equ  R_SYS_ABC_S+11
+R_SYS_C3			equ	 R_SYS_ABC_S+12
+R_SYS_C4			equ  R_SYS_ABC_S+13
+R_SYS_C5			equ  R_SYS_ABC_S+14
+
+R_SYS_RET			equ	 R_SYS_ABC_S+15
+R_SYS_ABC_E			equ	 10fh
+
+
+
+
+	
+
+
+
+	

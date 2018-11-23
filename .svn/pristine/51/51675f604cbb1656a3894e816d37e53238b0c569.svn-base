@@ -1,0 +1,27 @@
+# Generalplus IDE Solution File, Format Version 1.0.0
+# Warning: do not edit or delete this solution file!
+
+# ////////////////////////////////////////////////////
+# Begin Solution
+<Solution>
+	NAME : CST34M98
+	GUID : {333D7C65-34C0-43A6-9689-96010927751E}
+	STARTUP : {19CDE7C2-1805-4888-A7AE-891A7F749F98}
+	ACTIVECONFIGURATION : Release
+</Solution>
+# End Solution
+
+# ////////////////////////////////////////////////////
+# Begin Project
+<Projects>
+	COUNT : 1
+	<Project1>
+		NAME : CST34M98
+		GUID : {19CDE7C2-1805-4888-A7AE-891A7F749F98}
+		PATH : .\CST34M98.csuprj
+		Dependencies : 
+	</Project1>
+</Projects>
+
+# End Project
+# ////////////////////////////////////////////////////
