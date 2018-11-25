@@ -51,7 +51,7 @@ include		CS_LVD.asm
 ;include		CS_LCD.asm
 include		CS_Thermistor.asm
 include		CS_Thermoplie_Sensor.asm
-include		CS_Temperature_Show.asm
+;include		CS_Temperature_Show.asm
 ;include		CS_Inside_Thermometer.asm
 ;include		CS_Application_Proc.asm
 
@@ -292,7 +292,7 @@ test_temp_pre_pre_pre_pre:
 	 movff3	  r_ain01_ad_l,R_NTC_ADCacheL	;保存AD 
      movff3	  r_ain01_ad_l,R_SYS_A0
      call     F_TMSR_Rest_Count     ;;计算温度,先用计算电阻代替 R_RestL/m/h
-	 ;电阻转换成当前温度
+	 call     f_res_to_temp         ;电阻转换成当前温度
   realtime_measure_avoid_quilt_com:
 	 btfss    R_thermometer_FLAG,b_app_unlock ;判断app发送解锁命令
 	 goto     app_lock_key_lp
@@ -308,8 +308,12 @@ test_temp_pre_pre_pre_pre:
       btfss    status,c
       goto     test_temp_pre_pre_pre
 	  clrf     R_DSP_BUFFER6
-
-	  movff3   R_RestL,R_TEMP3  ;;发送温度到app 用发送电阻代替R_RestL --> R_TEMP3
+	  
+	  movfw    r_table_temp_l
+	  movwf    R_TEMP3
+	  movfw    r_table_temp_h
+	  movwf    R_TEMP4
+	  clrf     R_TEMP5  ;;发送温度到app 用发送电阻代替R_RestL --> R_TEMP3
 	  call     f_ble_send_result_to_app
 	  
       goto     test_temp_pre_pre_pre
@@ -324,7 +328,7 @@ test_temp_pre_pre_pre_pre:
 	   movff3	r_ain23_ad_l,R_NTC_ADCacheL	;保存AD  ;;计算温度
        movff3	r_ain23_ad_l,R_SYS_A0
        call     F_TMSR_Rest_Count     ;;计算温度,先用计算电阻代替R_RestL/m/h
-	   ;电阻转换成踢被温度
+	   call     f_res_to_temp        ;电阻转换成踢被温度
 	   goto     realtime_measure_avoid_quilt_com
 	   
  avoid_quilt_end:
@@ -344,13 +348,20 @@ test_temp_pre_pre_pre_pre:
 	   movff3	r_ain01_ad_l,R_NTC_ADCacheL	;保存AD 
 	   movff3	r_ain01_ad_l,R_SYS_A0
 	   call     F_TMSR_Rest_Count     ;;计算温度,先用计算电阻代替 R_RestL/m/h
-	   ;电阻转换成当前温度
+	   call     f_res_to_temp  ;电阻转换成当前温度
 
        btfsc   R_thermometer_FLAG,b_temp_std ;温度已经稳定过？
        goto    redy_temp_std_lp
 	   goto    un_temp_std_lp
   un_temp_std_lp:  
-       ;;判断是否大于临界温度
+	   bcf     R_thermometer_FLAG,b_critical_temp ;;判断是否大于临界温度
+       movlw   low 32000
+	   subwf   r_table_temp_l,0
+	   movlw   high 32000
+	   subwfc  r_table_temp_h,0
+	   btfsc   status,c    
+	   bsf     R_thermometer_FLAG,b_critical_temp
+	   
 	   btfss   R_thermometer_FLAG,b_critical_temp ;判断大于临界温度
 	   goto    less_critical_temp_lp
 	   movlw   C_CAL_TEMP_USED_N_AD
@@ -370,7 +381,14 @@ test_temp_pre_pre_pre_pre:
 	   
 	   btfsc   BLE_STATUS	    ;0 连接上  1 断开
 	   goto    less_critical_temp_lp_pre
-	   ;;发送温度数据到app   
+	   
+	   movfw    r_table_temp_l
+	   movwf    R_TEMP3
+	   movfw    r_table_temp_h  ;;发送温度数据到app   
+	   movwf    R_TEMP4
+	   clrf     R_TEMP5 
+	   call     f_ble_send_result_to_app
+
 	   goto     less_critical_temp_lp
 	   
   less_critical_temp_lp_pre:

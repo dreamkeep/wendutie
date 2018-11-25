@@ -295,6 +295,7 @@ DEFINE	R_DSP_BUFFER11_BIT7	"L_NONE"
 ;============================================
 ; 查表函数
 ;============================================
+/*
 F_Dsp_Table:
 		addpcw	       
 		retlw	Lcdch0	;0	(work=0)
@@ -319,11 +320,12 @@ F_Dsp_Table:
 		retlw	LcdchP	;P  (work=19)
 		retlw	Lcdchn	;n  (work=20)
 		retlw	Lcdchr	;r  (work=21)
-
+*/
 		
 ;============================================
 ; 查表函数
 ;============================================
+/*
 F_Dsp_Table1:
 		addpcw	       
 		retlw	Lcd1ch0	;0	(work=0)
@@ -348,7 +350,7 @@ F_Dsp_Table1:
 		retlw	Lcd1chP	;P  (work=19)
 		retlw	Lcd1chn	;n  (work=20)
 		retlw	Lcd1chr	;r  (work=21)
-
+*/
 ;============================================
 ; LCD显示函数
 ;============================================
@@ -361,6 +363,7 @@ F_Dsp_Table1:
 ; 程序思路：
 ;   NOP    
 ;============================================
+/*
 F_LCD_Proc:	
 		;btfss	R_Flag_Sys,B_LCD_En	
 		goto	L_LCD_Proc_Exit
@@ -369,7 +372,7 @@ F_LCD_Proc:
 		call	F_LCD_MAPPING_ASSIGNMENT 
 L_LCD_Proc_Exit:
 		RETURN
-
+*/
 ;============================================
 ; 清中间缓存变量函数
 ;============================================
@@ -382,6 +385,7 @@ L_LCD_Proc_Exit:
 ; 程序思路：
 ;   NOP    
 ;============================================
+/*
 F_LCD_MAPPING_CLR:
 		clrf	R_LCD_2_1
 		clrf	R_LCD_4_3
@@ -394,7 +398,7 @@ F_LCD_MAPPING_CLR:
 		clrf	R_LCD_18_17
 		clrf	R_LCD_20_19	
 		RETURN
-
+*/
 ;============================================
 ; 显示缓存转换函数
 ;============================================
@@ -408,6 +412,7 @@ F_LCD_MAPPING_CLR:
 ;   NOP    
 ;============================================
 ;通用版本	
+/*
 F_LCD_MAPPING:
 		;---数字部分转换
 		;---buffer1-4转换
@@ -510,7 +515,7 @@ F_LCD_MAPPING:
 		bsf		R_DSP_BUFFER11_BIT7
 		
 		return
-
+*/
 ;============================================
 ; LCD寄存器赋值函数
 ;============================================
@@ -523,6 +528,7 @@ F_LCD_MAPPING:
 ; 程序思路：
 ;   NOP    
 ;============================================
+/*
 F_LCD_MAPPING_ASSIGNMENT:
 		movfw	R_LCD_2_1
 		movwf	LCD1
@@ -570,7 +576,7 @@ F_LCD_MAPPING_ASSIGNMENT:
 		movwf	LCD20
 		RETURN
 
-
+*/
 		
 
 

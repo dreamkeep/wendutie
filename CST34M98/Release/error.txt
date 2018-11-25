@@ -18,12 +18,11 @@
 --- cs_lvd.asm
 --- cs_thermistor.asm
 --- cs_thermoplie_sensor.asm
---- cs_temperature_show.asm
 --- cs_table.asm
 生成Hex文件.
 
 目标器件 :CSU18M88
 CodeOption  : CodeOption0:0xffff;CodeOption1:0xfffa;
-Checksum : D713
-E:\bak\温度计\杭州世佳温度计项目资料\温度计DOME1.0\CST34M98\//main.asm
-共用程序空间 ：3586×16 bits ( 43.77% )
+Checksum : 7880
+C:\Users\jiang\Desktop\wendutie\CST34M98\//main.asm
+共用程序空间 ：3547×16 bits ( 43.29% )

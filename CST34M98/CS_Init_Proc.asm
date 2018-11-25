@@ -414,8 +414,21 @@ f_no_led:;全灭
 	
 	
 ;电阻表
-
+;[in] 填充EADRH EADRL
+;[out]输出R_TEMP5 R_TEMP4 R_TEMP3 h/m/l
+f_get_table_data:
+	movp
+	movwf   R_TEMP5
 	
+	movlw	1
+	addwf	EADRL,1
+	clrf	work
+	addwfc	EADRH,1 ;+1
+	movp
+	movwf   R_TEMP3 
+	movfw   EDAT
+	movwf   R_TEMP4
+return
 	
 	
 ;r_table_res_l   equ  1C0H  ;电阻table
@@ -448,17 +461,7 @@ f_res_to_temp: ;电阻转换成温度
 	movlw	low   TABLE_ADDR_START
 	movwf	EADRL
 	
-	movp
-	movwf   R_TEMP5
-	
-	movlw	1
-	addwf	EADRL,1
-	clrf	work
-	addwfc	EADRH,1 ;+1
-	movp
-	movwf   R_TEMP3 
-	movfw   EDAT
-	movwf   R_TEMP4
+	call    f_get_table_data
 	
 	movfw   R_TEMP3
 	subwf   R_RestL,0
@@ -468,12 +471,28 @@ f_res_to_temp: ;电阻转换成温度
 	subwfc  R_RestH,0
 	btfss   status,c ;R_RestH/m/l < data[0]
 	goto    end_check
- res_err_exit:
+ res_err_exit_check:  ;判断是否是0度
+    movfw   R_TEMP3
+	xorwf   R_RestL,0
+	btfss   status,z
+	goto    res_err_exit
+	movfw   R_TEMP4
+	xorwf   R_RestM,0
+	btfss   status,z
+	goto    res_err_exit
+	movfw   R_TEMP5
+	xorwf   R_RestH,0
+	btfss   status,z
+	goto    res_err_exit
+	clrf    r_table_temp_l
+	clrf    r_table_temp_h ;0度
+	return
+ res_err_exit:	 ;table 之外报错
 	movlw   0xff
 	movwf   r_table_temp_l
 	movwf   r_table_temp_h
 	return
- end_check:
+ end_check:         ;检查是否大于50度
 	movlw	high  TABLE_ADDR_START
 	movwf	EADRH
 	movlw	low   TABLE_ADDR_START
@@ -484,17 +503,7 @@ f_res_to_temp: ;电阻转换成温度
 	movlw   high TABLE_ADDR_SIZE
 	addwfc  EADRH,1	
 	
-    movp
-	movwf   R_TEMP5
-	
-	movlw	1
-	addwf	EADRL,1
-	clrf	work
-	addwfc	EADRH,1 ;+1
-	movp
-	movwf   R_TEMP3 
-	movfw   EDAT
-	movwf   R_TEMP4
+	call    f_get_table_data
     
 	movfw   R_TEMP3
 	subwf   R_RestL,0
@@ -503,39 +512,238 @@ f_res_to_temp: ;电阻转换成温度
 	movfw   R_TEMP5
 	subwfc  R_RestH,0
 	btfss   status,c ;R_RestH/m/l >data[500]
-    goto    res_err_exit
- 
-    clrf    r_table_from_l   ;table from 标号
-    clrf    r_table_from_h   ;table from 标号   
-    movlw   low  500
-    movwf   r_table_to_l   ;table to 标号   
-    movlw   high 500
-    movwf   r_table_from_h
-    
-    movfw   r_table_from_l
-    subwf   r_table_to_l,0
-    movfw   r_table_from_h
-    subwfc  r_table_to_h,0  ; r_table_to_h/l - r_table_from_h/l
+    goto    res_err_exit    ;小与50度电阻之外报错 
+	goto    res_check_50000
+ res_check_50000:  ;判断是否是50度
+    movfw   R_TEMP3
+	xorwf   R_RestL,0
+	btfss   status,z
+	goto    check_not_50000
+    movfw   R_TEMP4
+	xorwf   R_RestM,0
+	btfss   status,z	
+	goto    check_not_50000
+    movfw   R_TEMP5
+	xorwf   R_RestH,0
+	btfss   status,z
+	goto    check_not_50000
+	movlw   low 50000
+	movwf   r_table_temp_l
+	movlw   high 50000
+	movwf   r_table_temp_h  ;就是50度
+	return
+	
+ check_not_50000:    ;0~50度之间，初始化 left right 标号
+    clrf    r_table_left_l   ;table to 标号
+    clrf    r_table_left_h   ;table to 标号   
+    movlw   low  1000
+    movwf   r_table_right_l  ;table from 标号   
+    movlw   high 1000
+    movwf   r_table_right_h  ;table from 标号  1个电阻3字节存放所以要占用2字
+   
+  left_right_while:
+    movfw   r_table_left_l
+    subwf   r_table_right_l,0
+    movfw   r_table_left_h
+    subwfc  r_table_right_h,0  ; r_table_right_h/l - r_table_left_h/l
     btfss   status,c
-    goto    
+    goto    find_from_to_lp
+   
+    movfw   r_table_left_l ;r_table_mid_h/l
+    addwf   r_table_right_l,0
+    movwf   r_table_mid_l
     
-    movfw   r_table_from_l
-    addwf   r_table_to_l,0
-    movwf   r_mid_l
-    
-    movfw   r_table_from_h
-    addwf   r_table_to_h,0
-    movwf   r_mid_h
+    movfw   r_table_left_h
+    addwfc  r_table_right_h,0
+    movwf   r_table_mid_h
     
     bcf     status,c
-    rrf     r_table_to_h,1
-    rrf     r_table_to_l,1
+    rrf     r_table_mid_h,1
+    rrf     r_table_mid_l,1
     
+	movfw   r_table_mid_l
+	movwf   EADRL
+	movfw   r_table_mid_h
+	movwf   EADRH
     
+    call    f_get_table_data;输出R_TEMP5 R_TEMP4 R_TEMP3 h/m/l	
+    
+	movfw   R_RestL
+	subwf   R_TEMP3,0
+	movfw   R_RestM
+	subwfc  R_TEMP4,0
+	movfw   R_RestH
+	subwfc  R_TEMP5,0
+	btfss   status,c  ;R_TEMP5/4/3 - R_RestH/M/L
+    goto    data_mid_less_aim
+	goto    data_mid_greater_or_equ_aim
+ data_mid_greater_or_equ_aim:
+    movfw   R_TEMP3
+	xorwf   R_RestL,0
+	btfss   status,z
+    goto    data_mid_greater_aim	
+    movfw   R_TEMP4
+	xorwf   R_RestM,0
+	btfss   status,z
+    goto    data_mid_greater_aim	
+    movfw   R_TEMP5
+	xorwf   R_RestH,0
+	btfss   status,z
+    goto    data_mid_greater_aim	
+    goto    data_mid_equ_aim
+ data_mid_equ_aim:
+    movfw   r_table_left_l ;1000*100/2=1000*50=50000
+	movwf   R_SYS_A0
+	movfw   r_table_left_h
+	movwf   R_SYS_A1
+	clrf    R_SYS_A2
+	movlw   low  50
+	movwf   R_SYS_B0
+	movlw   high 50
+	movwf   R_SYS_B1
+	clrf    R_SYS_B2
+	call    F_Mul24U
+	movfw   R_SYS_C0
+	movwf   r_table_temp_l
+	movfw   R_SYS_C1
+	movwf   r_table_temp_h  ;出温度
+	return
+  data_mid_greater_aim:
+    movlw   2
+    addwf   r_table_mid_l,0
+    movwf   r_table_left_l
+    clrf    work	
+	addwfc  r_table_mid_h,0
+	movwf   r_table_left_h
+	goto    left_right_while
+ 
+  data_mid_less_aim:
+    movlw   2
+	subwf   r_table_mid_l,0
+	movwf   r_table_right_l
+	clrf    work
+	subwfc  r_table_mid_h,0
+	movwf   r_table_right_h
+	goto    left_right_while
+    /* r_table_left_l   ;table to 标号
+	   r_table_right_l  ;table from 标号   
+	t = temp[to] + (temp[from] - temp[to])*(aim - data[to])
+	                                     /(data[from] - data[to]);
+	*/
+ find_from_to_lp:
+	movfw   r_table_left_l
+	movwf   EADRL
+	movfw   r_table_left_h
+	movwf   EADRH           ;data[to]
+	call    f_get_table_data;输出R_TEMP5 R_TEMP4 R_TEMP3 h/m/l	
+	
+	movfw   R_TEMP3
+	subwf   R_RestL,0
+	movwf   R_SYS_A0
+	
+	movfw   R_TEMP4
+	subwfc  R_RestM,0
+	movwf   R_SYS_A1
+	
+	movfw   R_TEMP5
+	subwfc  R_RestH,0
+	movwf   R_SYS_A2  ; R_SYS_A2 = (aim - data[to])
+	
+	movlw   low 100
+	movwf   R_SYS_B0
+	movlw   high 100
+	movwf   R_SYS_B1
+	clrf    R_SYS_B2  ; |(temp[from] - temp[to])| = 100
+	call    F_Mul24U  ; C = |(temp[from] - temp[to])| * (aim - data[to]) 
+	
+    movfw   r_table_right_l
+	movwf   EADRL
+	movfw   r_table_right_h
+	movwf   EADRH           ;data[from]
+	call    f_get_table_data;输出R_TEMP5 R_TEMP4 R_TEMP3 h/m/l	
+	
+	movfw   R_TEMP3
+    movwf   R_SYS_A0
+	movfw   R_TEMP4
+	movwf   R_SYS_A1
+	movfw   R_TEMP5
+	movwf   R_SYS_A2   ;R_SYS_A2 = data[from]
+	
+	movfw   r_table_left_l
+	movwf   EADRL
+	movfw   r_table_left_h
+	movwf   EADRH           ;data[to]
+	call    f_get_table_data;输出R_TEMP5 R_TEMP4 R_TEMP3 h/m/l	
 
+	movfw   R_TEMP3
+	subwf   R_SYS_A0,1
+	
+	movfw   R_TEMP4
+	subwfc  R_SYS_A1,1
+	
+	movfw   R_TEMP5
+	subwfc  R_SYS_A2,1	;R_SYS_A3 = data[from] - data[to]
+	clrf    R_SYS_A3
+	clrf    R_SYS_A4
+	clrf    R_SYS_A5
+	                    
+	movfw   R_SYS_C0
+	movwf   R_SYS_B0
+	movfw   R_SYS_C1
+	movwf   R_SYS_B1
+	movfw   R_SYS_C2
+	movwf   R_SYS_B2   ; R_SYS_B2 = |(temp[from] - temp[to])| * (aim - data[to]) 
+	
+	call    F_Div24U  ;R_SYS_C0
+	
+	movfw   R_SYS_C0
+	movwf   R_SYS_B0
+	movfw   R_SYS_C1
+	movwf   R_SYS_B1
+	movfw   R_SYS_C2
+	movwf   R_SYS_B2
+	
+	movlw   low 100
+	movwf   R_SYS_A0
+	movlw   high 100
+	movwf   R_SYS_A1
+	clrf    R_SYS_A2  ; 100/R_SYS_B2
+	clrf    R_SYS_A3
+	clrf    R_SYS_A4
+	clrf    R_SYS_A5
+	call    F_Div24U  ;R_SYS_C0
+	
+	movfw   R_SYS_C0
+	movwf   R_TEMP3
+	movfw   R_SYS_C1
+	movwf   R_TEMP4
+	movfw   R_SYS_C2
+	movwf   R_TEMP5
+	   ;temp[to] = [ r_table_left_l /2 ]*100 = r_table_left_l*50
+	movfw   r_table_left_l
+	movwf   R_SYS_A0
+	movfw   r_table_left_h
+	movwf   R_SYS_A1
+    clrf    R_SYS_A2
     
-    
+    movlw   low 50
+    movwf   R_SYS_B0	
+	movlw   high 50
+	movwf   R_SYS_B1
+	clrf    R_SYS_B2
+	call    F_Mul24U
+	
+	movfw   R_TEMP3
+	subwf   R_SYS_C0,0
+	movwf   r_table_temp_l
+	
+	movfw   R_TEMP4
+	subwfc  R_SYS_C1,0
+	movwf   r_table_temp_h
 return
+	
+	
+
 	
 	
 ;TABLE_ADDR_START    Equ    0ED0H

@@ -87,6 +87,7 @@
 	R_VoltH: 电压值高8位
 	R_VoltL: 电压值低8位	
 ----------------------------------------------------------------------------*/
+	/*
 F_Measure_Volt:
 	;-----------------------------------------------
 	;Init 10bit-ADC
@@ -208,7 +209,7 @@ L_TEN_ADTX:
     movlw		5                  
     movwf		R_0TxDataLength
   	call		F_Uart0_Send_NByte
-  	return 
+  	return */
 /*----------------------------------------------------------------------------
 函数名称：F_Delay_Ms
 具体描述：延时子程序(ms)，当指令周期为8MHz/4(0.5us)时，约为0.5ms
@@ -220,6 +221,7 @@ L_TEN_ADTX:
 使用方法：
 	把数据放到WORK寄存器立即调用此函数
 ----------------------------------------------------------------------------*/	
+  	/*
 F_Delay_Ms:
 	movwf		R_TEMP1
 L_Delay_Ms_Loop0:
@@ -232,7 +234,7 @@ L_Delay_Ms_Loop1:
 	goto		L_Delay_Ms_Loop1
 	decfsz		R_TEMP1,1
 	goto		L_Delay_Ms_Loop0
-	return		
+	return		*/
 
 			
 	

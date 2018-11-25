@@ -59,7 +59,8 @@ F_Thmpsr_AIN23_Init:  ;AIN2为Vin+，AIN3为Vin-
 ; Temp    :  
 ; Other   :
 ; log     :
-;------------------------------------------		
+;------------------------------------------	
+/*
 F_Thmpsr_ADShort_Data_TX:
 	btfss	R_Temperature_Flag,B_Thmpsr_ADShort_Flag
    	return
@@ -114,8 +115,8 @@ F_Thmpsr_ADShort_Data_TX2:
 F_Thmpsr_ADShort_Data_Exit:      
 ;  	call	F_AD_Show
    	bcf		R_AD_FLAG,B_INT_GetAdc
-    return 
-    
+    return */
+/*  
 F_Thmpsr_Init:
 ;-----------------------------------------------------------------
 	;设置24bit-ADC
@@ -260,7 +261,7 @@ F_Thmpsr_Init:
 		
 	;bsf			R_Temperature_Flag,B_Thermoplie_Flag   ;初始化完成标志位	
 	return 
-	
+	*/
 ;------------------------------------------
 ; Name    : F_TMSR_AD_Data_TX
 ; Function: 发送AD数据
@@ -269,7 +270,8 @@ F_Thmpsr_Init:
 ; Temp    :  
 ; Other   :
 ; log     :
-;------------------------------------------		
+;------------------------------------------	
+	/*
 F_Thmpsr_AD_Data_TX:
 	btfss	R_Temperature_Flag,B_Thermoplie_Flag
    	return
@@ -323,4 +325,4 @@ F_Thmpsr_AD_Data_TX2:
 F_TMSR_AD_Data_TX_Exit:      
 ;  	call	F_AD_Show
    	bcf		R_AD_FLAG,B_INT_GetAdc
-    return	   
+    return	   */

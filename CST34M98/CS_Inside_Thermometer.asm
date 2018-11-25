@@ -17,6 +17,7 @@ R_AvgBufADHH            equ  R_AD_SEG_S+4       ;32位AD求和缓存bit31~24
 ; 程序思路：
 ;   NOP
 ;============================================
+/*
 F_AD_Temp_Init:
 	btfsc	R_Temperature_Flag,B_AD_Temp_Flag
    	return
@@ -294,3 +295,4 @@ F_Temp_Data_TX:
 ;    movwf   R_0TxDataLength
 ;    call    F_Uart0_Send_NByte
 ;	return
+*/

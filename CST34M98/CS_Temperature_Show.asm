@@ -7,6 +7,7 @@
 ; Other   :
 ; log     :
 ;------------------------------------------	
+/*
 F_TEPture_Open:
 	;х╚от	
 	movlw	08h				
@@ -174,4 +175,5 @@ F_TEPture_Sleep_Show:
 	andlw	0fh
 	movwf	R_DSP_BUFFER3
 	return
+	*/
 	

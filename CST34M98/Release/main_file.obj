@@ -18,5 +18,4 @@ CS_INIT_PROC.ASM
 CS_LVD.ASM                           
 CS_THERMISTOR.ASM                    
 CS_THERMOPLIE_SENSOR.ASM             
-CS_TEMPERATURE_SHOW.ASM              
 CS_TABLE.ASM                         

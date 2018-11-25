@@ -45,8 +45,8 @@ R_TEMP3				equ	 87h
 R_TEMP4				equ	 88h
 R_TEMP5				equ	 89h
 
-r_mid_l   equ  R_TEMP0
-r_mid_h   equ  R_TEMP1
+r_table_mid_l   equ  R_TEMP0
+r_table_mid_h   equ  R_TEMP1
 	
 R_VoltL					equ		8ah
 R_VoltH					equ		8bh
@@ -278,8 +278,8 @@ r_table_res_h   equ  1C2H
 r_table_temp_l   equ  1C3H  ;温度table
 r_table_temp_h   equ  1C4H
 
-r_table_from_l   equ  1C5H  ;table from 标号
-r_table_from_h   equ  1C6H  ;table from 标号
+r_table_left_l   equ  1C5H  ;table to 标号
+r_table_left_h   equ  1C6H  ;table to 标号
 
-r_table_to_l   equ  1C7H   ;table to 标号
-r_table_to_h   equ  1C8H   ;table to 标号
+r_table_right_l   equ  1C7H   ;table from 标号
+r_table_right_h   equ  1C8H   ;table from 标号

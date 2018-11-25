@@ -35,6 +35,7 @@ R_Key_ShortPressTimes			equ		R_APP_KEY_S+1	;按键短按次数统计
 ; 程序思路：
 ;   NOP    
 ;============================================
+/*
 F_APP_KeyProc:	
 	movlw	ffh
 	subwf	R_Key_ShortPressCount,w
@@ -96,6 +97,6 @@ F_APP_KeyProc_L3_1:
 	
 	
 	
-
+*/
 
 

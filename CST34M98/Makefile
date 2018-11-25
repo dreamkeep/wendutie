@@ -1,7 +1,7 @@
 ###################################################
 #工具链定义处
 ###################################################
-TOOLCHAIN_DIR = D:/Program Files (x86)/Chipsea/CSU-IDE V4.0.8/chipsea/tools/Compiler/ASM
+TOOLCHAIN_DIR = E:/Program Files (x86)/Chipsea/CSU-IDE V4.0.9/chipsea/tools/Compiler/ASM
 ASM	   				= "$(TOOLCHAIN_DIR)\csua.exe"
 RM	   				= del /F 1>NUL 2>NUL
 ECHO					= @echo //-----------------------------------------------------------------------
@@ -11,9 +11,9 @@ ECHO					= @echo //-------------------------------------------------------------
 ###################################################
 #编译选项定义处
 ###################################################
-OUTPUT_DIR            = E:\bak\温度计\杭州世佳温度计项目资料\温度计DOME1.0\CST34M98\.\Release
+OUTPUT_DIR            = C:\Users\jiang\Desktop\wendutie\CST34M98\.\Release
 SOURCE_MAIN_FILE_NAME = main
-SOURCE_MAIN_FILE_PATH = E:\bak\温度计\杭州世佳温度计项目资料\温度计DOME1.0\CST34M98\/
+SOURCE_MAIN_FILE_PATH = C:\Users\jiang\Desktop\wendutie\CST34M98\/
 GENERATE_DAT_FILE			= 1
 BODY_NAME							= CSU18M88
 INST_TYPE							= 1
