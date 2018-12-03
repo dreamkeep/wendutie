@@ -328,6 +328,7 @@ F_TMSR_AD_Data_Exit:
 ; Other   :
 ; log     :
 ;------------------------------------------	 
+  /*
 F_TMSR_Rest_TX:
 	incf	R_Temp_Rest_Count,f
 	movlw	2
@@ -355,7 +356,7 @@ F_TMSR_Rest_TX:
     movwf   R_0TxDataLength
     call    F_Uart0_Send_NByte
    	bcf		R_AD_FLAG,B_INT_GetAdc	
-    return
+    return*/
  ;------------------------------------------
 ; Name    : F_Rest_Data_TX
 ; Function: µç×èÖµ¼ÆËã

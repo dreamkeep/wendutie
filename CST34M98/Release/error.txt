@@ -5,6 +5,7 @@
 --- bt_config.inc
 --- cs_lib_math.asm
 --- cs_lib_time.asm
+--- cs_lvd.asm
 --- cs_app_ble.asm
 --- cs_hw_uart.asm
 --- cs_hw_ble_bootloader.asm
@@ -15,14 +16,14 @@
 --- cs_ad_interrupt.asm
 --- cs_34m98_peripheral.asm
 --- cs_init_proc.asm
---- cs_lvd.asm
 --- cs_thermistor.asm
 --- cs_thermoplie_sensor.asm
+--- mtp.asm
 --- cs_table.asm
 生成Hex文件.
 
 目标器件 :CSU18M88
 CodeOption  : CodeOption0:0xffff;CodeOption1:0xfffa;
-Checksum : 7880
-C:\Users\jiang\Desktop\wendutie\CST34M98\//main.asm
-共用程序空间 ：3547×16 bits ( 43.29% )
+Checksum : 3CBD
+E:\bak\温度计\杭州世佳温度计项目资料\温度计DOME1.0\CST34M98\//main.asm
+共用程序空间 ：4089×16 bits ( 49.91% )

@@ -92,6 +92,9 @@ R_RestL				equ	 b0h
 R_RestM				equ	 b1h
 R_RestH				equ	 b2h
 R_Data_Pointer		equ	 b3h
+
+r_counter_l         equ  b4h
+r_counter_h         equ  b5h
 ;--------------------------------------------
 ; 分配到CS_HW_Key.asm的RAM地址和大小
 ;--------------------------------------------
@@ -147,10 +150,10 @@ R_Temp_DeltaH               equ   F8h
 
 R_Temp_OutL					equ	  F9h
 R_Temp_OutH					equ	  FAh
-R_BCD_TempL					equ	  FBh
-R_Temp_OutHH                equ   R_BCD_TempL
-
-R_BCD_TempH					equ   FCh
+;R_BCD_TempL					equ	  FBh
+;R_BCD_TempH					equ   FCh
+r_e2p_data      	equ	  FBh
+r_e2p_cal_xor   	equ   FCh
 
 R_thermometer_FLAG                 equ   FDh 
                 b_key_lock    equ  0  ;按键锁死标志 
@@ -246,12 +249,6 @@ r_sum_ad_l      equ    1B0H
 r_sum_ad_m       equ	1B1h	
 r_sum_ad_h       equ    1B2H
 r_sum_ad_hh       equ    1B3H
-
-r_left_l     equ  r_sum_ad_l
-r_left_h      equ  r_sum_ad_m
-
-r_right_l     equ  r_sum_ad_h
-r_right_h      equ  r_sum_ad_hh
 	
 
 r_ain01_ad_l     equ    1B4H
@@ -266,10 +263,12 @@ r_short_ad_l     equ    1BAH
 r_short_ad_m     equ    1BBH
 r_short_ad_h     equ    1BCH
 
+r_table_temp_pre_l     equ  1BDh
+r_table_temp_pre_h      equ  1BEh
 
-r_24bit_ad_temp_l_pre   equ  1BDh
-r_24bit_ad_temp_m_pre   equ  1BEh
-r_24bit_ad_temp_h_pre   equ  1BFh ;上次24bit ad温度
+r_ack_flag   equ  1BFh ;应答标志
+	b_ack_temp_data  equ 0 ;app应答温度数据
+	
 	
 r_table_res_l   equ  1C0H  ;电阻table
 r_table_res_m   equ  1C1H
@@ -283,3 +282,7 @@ r_table_left_h   equ  1C6H  ;table to 标号
 
 r_table_right_l   equ  1C7H   ;table from 标号
 r_table_right_h   equ  1C8H   ;table from 标号
+
+r_ad_cal_l        equ  1C9H
+r_ad_cal_m        equ  1CAH
+r_ad_cal_h        equ  1CBH

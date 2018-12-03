@@ -5,6 +5,7 @@ F_Thmpsr_ADShort_Init:
 	;btfsc		R_Temperature_Flag,B_Thmpsr_ADShort_Flag
    	;return
    ;call		F_App_ShowNull
+	bcf         ANACFG,ADEN	
 	bsf         ANACFG,1
 	bcf         ANACFG,2
 	;movlw		11100011b			;ANACFG:(上电默认值为:00000000)
@@ -36,18 +37,22 @@ F_Thmpsr_ADShort_Init:
 									;Bit0	ADEN: 24Bit-ADC使能标志
 									;	0 = 24bit-ADC不使能*
 									;	1 = 24bit-ADC使能
-   ;bsf			ANACFG,ADEN	  		;使能24bit-ADC
+    bsf			ANACFG,ADEN	  		;使能24bit-ADC
 ;	bsf			R_Temperature_Flag,B_Thmpsr_ADShort_Flag  ;初始化完成标志位
 	return 
 	
 F_Thmpsr_AIN01_Init: ;AIN0为Vin+，AIN1为Vin-
+	bcf         ANACFG,ADEN	
 	bcf      ANACFG,1
 	bcf       ANACFG,2
+	bsf         ANACFG,ADEN	
 	return
 
 F_Thmpsr_AIN23_Init:  ;AIN2为Vin+，AIN3为Vin-
+	bcf         ANACFG,ADEN	
 	bsf      ANACFG,1
 	bsf       ANACFG,2
+	bsf         ANACFG,ADEN	
 	return
 	
 

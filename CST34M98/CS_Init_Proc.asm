@@ -215,7 +215,7 @@ f_seneor_get_ain23_ad:
 f_sensor_err_check:
 	bcf      R_Flag_Sys,B_Sensor_err
 	
-	movlw    0x60
+	movlw    0x10
 	addwf    r_short_ad_l,0
 	movwf    R_TEMP0
 	movlw    0x00
@@ -224,6 +224,7 @@ f_sensor_err_check:
 	movlw    0x00
 	addwfc   r_short_ad_h,0
 	movwf    R_TEMP2              ;R_TEMP2/1/0 = r_short_ad_h/m/l + δ
+		
  check_ain23:	
 	movfw    r_ain23_ad_l
 	subwf    R_TEMP0,0
@@ -235,6 +236,7 @@ f_sensor_err_check:
 	goto     check_ain01
 	bsf      R_Flag_Sys,B_Sensor_err
 	return   
+	
  check_ain01:
     movfw    r_ain01_ad_l
     subwf    R_TEMP0,0
@@ -289,12 +291,52 @@ f_close_int0:
 return
 	
 f_sleep_init:
+	    ;IO设置
+		movlw      01111111b
+		movwf      pt1en
+
+		movlw 	   00000000b  ;1.3 1.4 上拉电阻输出低
+		movwf 	   pt1pu
+
+		clrf       pt1
+		bsf        pt1,6  ;tx
+		
+		movlw      11101011b
+		movwf      pt2en
+
+		movlw      00110100b   ;2.2 2.4 上拉输入
+		movwf      pt2pu
+		
+        clrf       pt2
+        bsf        pt2,5  ;对应ble_status 输出高
+        
+		movlw      0xff
+		movwf      pt3en
+
+		clrf       pt3pu
+        clrf       pt3 
+
+ 		movlw      0xff
+		movwf      pt4en
+
+		clrf       pt4pu
+        clrf       pt4 
+
+    	movlw      00011111b
+    	movwf	   pt5en
+
+		clrf       pt5pu
+        clrf       pt5 
+        
         ;初始化外部中断
         clrf       ptint0
         clrf       ptint1
         ;关闭ADC LCD TIM VS  失能
         bcf        anacfg,ldoen  
 		BCF			ANACFG,ADEN     ;adc  en
+		bcf 	   lcdenr,lcden 
+		bcf	       LCDENR,ENPMPL	;开pump
+		bcf		   LVDCON,LVDEN
 		bcf			tm0con,7
 		bcf			tm1con,7
 		bcf			tm2con,7
@@ -315,8 +357,12 @@ f_sleep_init:
 return
 
 f_wake_up_init:	
+	    bcf         pt2en,5 ;ble_status
+	    
+	    
 		bsf 	    anacfg,ldoen
 		BSF			ANACFG,ADEN     ;adc  en
+	    bsf		    LVDCON,LVDEN
 		bcf			tm0con,7
 		bcf			tm1con,7
 		bcf			tm2con,7
@@ -354,6 +400,8 @@ f_beep_work_150_ms:
 ;[in] R_DSP_BUFFER1 R_DSP_BUFFER2
 f_sleep_n_ms_or_key_press:
 l_sleep_n_ms_or_key_press:
+;	btfsc       R_thermometer_FLAG,b_key_lock
+;	return
 	btfss       POWER_ON_KEY
 	return
 	
@@ -375,6 +423,8 @@ f_green_n_ms_or_key_press:
 	bcf         R_Flag_Sys,B_N_MS_TM
     call        f_led_green
 l_green_n_ms_or_key_press:
+;	btfsc       R_thermometer_FLAG,b_key_lock
+;	return
 	btfsc       POWER_ON_KEY
 	goto        l_green_n_ms_or_key_press_l1
 	bsf         R_Flag_Sys,B_N_MS_TM
@@ -393,6 +443,34 @@ l_green_n_ms_or_key_press_l1:
 	call        f_no_led
 	bcf         R_Flag_Sys,B_N_MS_TM
 	return	
+	
+;[in]  R_DSP_BUFFER1 R_DSP_BUFFER2
+;key press  B_N_MS_TM =1
+;timeout    B_N_MS_TM =0
+f_red_n_ms_or_key_press:
+	bcf         R_Flag_Sys,B_N_MS_TM
+    call        f_led_red
+l_red_n_ms_or_key_press:
+;	btfsc       R_thermometer_FLAG,b_key_lock
+;	return
+	btfsc       POWER_ON_KEY
+	goto        l_red_n_ms_or_key_press_l1
+	bsf         R_Flag_Sys,B_N_MS_TM
+	return
+l_red_n_ms_or_key_press_l1:	
+	call        f_led_red
+    movlw	    1
+	call   	    F_delay_1ms	
+	
+	movlw       1
+	subwf       R_DSP_BUFFER2,1
+	movlw       0
+	subwfc      R_DSP_BUFFER1,1
+	btfsc       status,c
+	goto        l_red_n_ms_or_key_press
+	call        f_no_red
+	bcf         R_Flag_Sys,B_N_MS_TM
+	return		
 	
 	
 f_led_red:;红灯亮
@@ -414,9 +492,19 @@ f_no_led:;全灭
 	
 	
 ;电阻表
-;[in] 填充EADRH EADRL
+;[in] 填充EADRH EADRL 填充得是相遇于TABLE_ADDR_START的偏移地址
 ;[out]输出R_TEMP5 R_TEMP4 R_TEMP3 h/m/l
 f_get_table_data:
+	movfw   EADRL
+	addwf   EADRL,1
+	movfw   EADRH
+	addwfc  EADRH,1  ;x2
+	
+	movlw	low   TABLE_ADDR_START
+	addwf	EADRL,1	
+	movlw	high  TABLE_ADDR_START
+	addwfc	EADRH,1                       ;+offset
+
 	movp
 	movwf   R_TEMP5
 	
@@ -455,11 +543,10 @@ return
 ;R_TEMP4				equ	 88h m
 ;R_TEMP5				equ	 89h h
 f_res_to_temp: ;电阻转换成温度
+	
 	;R_RestH/m/l - data[0]   
-	movlw	high  TABLE_ADDR_START
-	movwf	EADRH
-	movlw	low   TABLE_ADDR_START
-	movwf	EADRL
+	clrf    EADRL
+	clrf    EADRH
 	
 	call    f_get_table_data
 	
@@ -469,39 +556,40 @@ f_res_to_temp: ;电阻转换成温度
 	subwfc  R_RestM,0
 	movfw   R_TEMP5
 	subwfc  R_RestH,0
-	btfss   status,c ;R_RestH/m/l < data[0]
+	btfss   status,c ;R_RestH/m/l < data[0]   R_RestH/m/l - 最大的电阻
 	goto    end_check
  res_err_exit_check:  ;判断是否是0度
     movfw   R_TEMP3
 	xorwf   R_RestL,0
 	btfss   status,z
-	goto    res_err_exit
+	goto    res_err_exit1
 	movfw   R_TEMP4
 	xorwf   R_RestM,0
 	btfss   status,z
-	goto    res_err_exit
+	goto    res_err_exit1
 	movfw   R_TEMP5
 	xorwf   R_RestH,0
 	btfss   status,z
-	goto    res_err_exit
+	goto    res_err_exit1
 	clrf    r_table_temp_l
 	clrf    r_table_temp_h ;0度
 	return
- res_err_exit:	 ;table 之外报错
+ res_err_exit1:	 ;table 之外报错
 	movlw   0xff
 	movwf   r_table_temp_l
 	movwf   r_table_temp_h
+	return	
+ res_err_exit:	 ;table 之外报错
+	movlw   0xf0
+	movwf   r_table_temp_l
+	movwf   r_table_temp_h
 	return
- end_check:         ;检查是否大于50度
-	movlw	high  TABLE_ADDR_START
-	movwf	EADRH
-	movlw	low   TABLE_ADDR_START
-	movwf	EADRL
+ end_check:         ;检查是否大于50度	
 	
 	movlw   low TABLE_ADDR_SIZE
-	addwf   EADRL,1
+	movwf   EADRL
 	movlw   high TABLE_ADDR_SIZE
-	addwfc  EADRH,1	
+	movwf   EADRH	
 	
 	call    f_get_table_data
     
@@ -527,18 +615,18 @@ f_res_to_temp: ;电阻转换成温度
 	xorwf   R_RestH,0
 	btfss   status,z
 	goto    check_not_50000
-	movlw   low 50000
+	movlw   low 500
 	movwf   r_table_temp_l
-	movlw   high 50000
+	movlw   high 500
 	movwf   r_table_temp_h  ;就是50度
 	return
 	
  check_not_50000:    ;0~50度之间，初始化 left right 标号
     clrf    r_table_left_l   ;table to 标号
     clrf    r_table_left_h   ;table to 标号   
-    movlw   low  1000
+    movlw   low  500
     movwf   r_table_right_l  ;table from 标号   
-    movlw   high 1000
+    movlw   high 500
     movwf   r_table_right_h  ;table from 标号  1个电阻3字节存放所以要占用2字
    
   left_right_while:
@@ -560,12 +648,12 @@ f_res_to_temp: ;电阻转换成温度
     bcf     status,c
     rrf     r_table_mid_h,1
     rrf     r_table_mid_l,1
-    
-	movfw   r_table_mid_l
-	movwf   EADRL
-	movfw   r_table_mid_h
-	movwf   EADRH
-    
+
+    movfw   r_table_mid_l
+    movwf   EADRL
+    movfw   r_table_mid_h
+    movwf   EADRH
+	
     call    f_get_table_data;输出R_TEMP5 R_TEMP4 R_TEMP3 h/m/l	
     
 	movfw   R_RestL
@@ -592,24 +680,28 @@ f_res_to_temp: ;电阻转换成温度
     goto    data_mid_greater_aim	
     goto    data_mid_equ_aim
  data_mid_equ_aim:
-    movfw   r_table_left_l ;1000*100/2=1000*50=50000
-	movwf   R_SYS_A0
-	movfw   r_table_left_h
-	movwf   R_SYS_A1
-	clrf    R_SYS_A2
-	movlw   low  50
-	movwf   R_SYS_B0
-	movlw   high 50
-	movwf   R_SYS_B1
-	clrf    R_SYS_B2
-	call    F_Mul24U
-	movfw   R_SYS_C0
+;    movfw   r_table_left_l ;1000*100/2=1000*50=50000
+;	movwf   R_SYS_A0
+;	movfw   r_table_left_h
+;	movwf   R_SYS_A1
+;	clrf    R_SYS_A2
+;	movlw   low  50
+;	movwf   R_SYS_B0
+;	movlw   high 50
+;	movwf   R_SYS_B1
+;	clrf    R_SYS_B2
+;	call    F_Mul24U
+;	movfw   R_SYS_C0
+;	movwf   r_table_temp_l
+;	movfw   R_SYS_C1
+;	movwf   r_table_temp_h  ;出温度
+    movfw   r_table_left_l ;
 	movwf   r_table_temp_l
-	movfw   R_SYS_C1
+	movfw   r_table_left_h
 	movwf   r_table_temp_h  ;出温度
 	return
   data_mid_greater_aim:
-    movlw   2
+    movlw   1
     addwf   r_table_mid_l,0
     movwf   r_table_left_l
     clrf    work	
@@ -618,7 +710,7 @@ f_res_to_temp: ;电阻转换成温度
 	goto    left_right_while
  
   data_mid_less_aim:
-    movlw   2
+    movlw   1
 	subwf   r_table_mid_l,0
 	movwf   r_table_right_l
 	clrf    work
@@ -629,12 +721,23 @@ f_res_to_temp: ;电阻转换成温度
 	   r_table_right_l  ;table from 标号   
 	t = temp[to] + (temp[from] - temp[to])*(aim - data[to])
 	                                     /(data[from] - data[to]);
+	  temp[to] = r_table_left_l
+	  temp[from] = r_table_right_l
+	  (temp[from] - temp[to]) = -1
+	  
 	*/
  find_from_to_lp:
+    movfw   r_table_left_l ;
+	movwf   r_table_temp_l
+	movfw   r_table_left_h
+	movwf   r_table_temp_h  ;出温度
+	return
+   /*
 	movfw   r_table_left_l
 	movwf   EADRL
 	movfw   r_table_left_h
-	movwf   EADRH           ;data[to]
+	movwf   EADRH                 ;data[to]
+       
 	call    f_get_table_data;输出R_TEMP5 R_TEMP4 R_TEMP3 h/m/l	
 	
 	movfw   R_TEMP3
@@ -654,12 +757,13 @@ f_res_to_temp: ;电阻转换成温度
 	movlw   high 100
 	movwf   R_SYS_B1
 	clrf    R_SYS_B2  ; |(temp[from] - temp[to])| = 100
-	call    F_Mul24U  ; C = |(temp[from] - temp[to])| * (aim - data[to]) 
-	
-    movfw   r_table_right_l
+	call    F_Mul24U  ; C = |(temp[from] - temp[to])| * (aim - data[to])        
+
+	movfw   r_table_right_l
 	movwf   EADRL
 	movfw   r_table_right_h
-	movwf   EADRH           ;data[from]
+	movwf   EADRH                 ;data[from]
+	
 	call    f_get_table_data;输出R_TEMP5 R_TEMP4 R_TEMP3 h/m/l	
 	
 	movfw   R_TEMP3
@@ -667,12 +771,13 @@ f_res_to_temp: ;电阻转换成温度
 	movfw   R_TEMP4
 	movwf   R_SYS_A1
 	movfw   R_TEMP5
-	movwf   R_SYS_A2   ;R_SYS_A2 = data[from]
-	
+	movwf   R_SYS_A2   ;R_SYS_A2 = data[from]           
+	        
 	movfw   r_table_left_l
 	movwf   EADRL
 	movfw   r_table_left_h
-	movwf   EADRH           ;data[to]
+	movwf   EADRH                  ;data[to]
+	
 	call    f_get_table_data;输出R_TEMP5 R_TEMP4 R_TEMP3 h/m/l	
 
 	movfw   R_TEMP3
@@ -700,8 +805,8 @@ f_res_to_temp: ;电阻转换成温度
 	movwf   R_SYS_B0
 	movfw   R_SYS_C1
 	movwf   R_SYS_B1
-	movfw   R_SYS_C2
-	movwf   R_SYS_B2
+	movfw   R_SYS_C2 
+	movwf   R_SYS_B2  ;;R_SYS_B0 = R_SYS_C0
 	
 	movlw   low 100
 	movwf   R_SYS_A0
@@ -719,16 +824,16 @@ f_res_to_temp: ;电阻转换成温度
 	movwf   R_TEMP4
 	movfw   R_SYS_C2
 	movwf   R_TEMP5
-	   ;temp[to] = [ r_table_left_l /2 ]*100 = r_table_left_l*50
+	   ;temp[to] = [ r_table_left_l ]*10 = r_table_left_l*50
 	movfw   r_table_left_l
 	movwf   R_SYS_A0
 	movfw   r_table_left_h
 	movwf   R_SYS_A1
     clrf    R_SYS_A2
     
-    movlw   low 50
+    movlw   low 100
     movwf   R_SYS_B0	
-	movlw   high 50
+	movlw   high 100
 	movwf   R_SYS_B1
 	clrf    R_SYS_B2
 	call    F_Mul24U
@@ -740,12 +845,126 @@ f_res_to_temp: ;电阻转换成温度
 	movfw   R_TEMP4
 	subwfc  R_SYS_C1,0
 	movwf   r_table_temp_h
+	
+	movfw   r_table_temp_l
+	movwf   R_SYS_A0
+	movfw   r_table_temp_h
+	movwf   R_SYS_A1
+	clrf    R_SYS_A2
+	clrf    R_SYS_A3
+	clrf    R_SYS_A4
+	clrf    R_SYS_A5
+	movlw   low 100
+	movwf   R_SYS_B0
+	clrf    R_SYS_B1
+	clrf    R_SYS_B2
+	call    F_Div24U
+	movfw   R_SYS_C0
+	movwf   r_table_temp_l
+	movfw   R_SYS_C1
+	movwf   r_table_temp_h*/
 return
 	
+	
+f_cur_pre_temp_judge_update:
+	movfw     r_table_temp_pre_l
+	subwf     r_table_temp_l,0
+	movwf     R_TEMP3
+	
+	movfw     r_table_temp_pre_h
+	subwfc    r_table_temp_h,0
+	movwf     R_TEMP4
+	btfss     status,c          ;r_table_temp_h - r_table_temp_pre_h
+	goto      cur_less_pre
+	goto      cur_grater_pre
+ cur_less_pre:
+     movfw    r_table_temp_l
+	 subwf    r_table_temp_pre_l,0
+	 movwf    R_TEMP3
+	 
+     movfw    r_table_temp_h
+	 subwf    r_table_temp_pre_h,0
+	 movwf    R_TEMP4             ;r_table_temp_h - r_table_temp_pre_h    
+ cur_grater_pre:
+    movlw     low   1
+	subwf     R_TEMP3,1
+	movlw     high  1
+	subwfc    R_TEMP4,1        ;|r_table_temp_h - r_table_temp_pre_h| - 1
+return
+	
+f_load_mtp_data:
+	call     f_e2p_read_data_from_rom
+	movlw    0xff
+	xorwf    r_ad_cal_h,0
+	btfsc    status,z
+	goto     clr_cal_exit
+	movlw    0xff
+	xorwf    r_ad_cal_m,0
+	btfsc    status,z
+	goto     clr_cal_exit
+	movlw    0xff
+	xorwf    r_ad_cal_l,0
+	btfsc    status,z
+	goto     clr_cal_exit
+	
+	btfsc    r_ad_cal_h,7
+	goto     neg_load
+	goto     pos_load 
+	
+ neg_load:
+    bcf      r_ad_cal_h,7 
+    movlw    C_37_1_36_9_Max_L
+    subwf    r_ad_cal_l,0
+    movlw    C_37_1_36_9_Max_M
+    subwfc   r_ad_cal_m,0
+    movlw    C_37_1_36_9_Max_H
+    subwfc   r_ad_cal_h,0
+    btfss    status,c
+    goto     neg_load_exit
+   clr_cal_exit:
+    clrf     r_ad_cal_l
+    clrf     r_ad_cal_m
+    clrf     r_ad_cal_h
+    return
+ neg_load_exit:
+    bsf      r_ad_cal_h,7
+    return  
+ pos_load:
+    movlw    C_37_1_36_9_Max_L
+    subwf    r_ad_cal_l,0
+    movlw    C_37_1_36_9_Max_M
+    subwfc   r_ad_cal_m,0
+    movlw    C_37_1_36_9_Max_H
+    subwfc   r_ad_cal_h,0
+    btfss    status,c
+	return
+	goto     clr_cal_exit
 	
 
 	
 	
+f_adjust_measyre_res:
+	btfsc    r_ad_cal_h,7
+	goto     neg_adjust
+	goto     pos_adjust
+neg_adjust:;负数调整
+	bcf      r_ad_cal_h,7
+	movfw    r_ad_cal_l
+	addwf    R_RestL,1
+	movfw    r_ad_cal_m
+	addwfc   R_RestM,1
+	movfw    r_ad_cal_h
+	addwfc   R_RestH,1
+	bsf      r_ad_cal_h,7
+	return
+pos_adjust:;正数调整
+	movfw    r_ad_cal_l
+	subwf    R_RestL,1
+	movfw    r_ad_cal_m
+	subwfc   R_RestM,1
+	movfw    r_ad_cal_h
+	subwfc   R_RestH,1
+	return
 ;TABLE_ADDR_START    Equ    0ED0H
 ;TABLE_ADDR_SIZE     equ    03EAH
 	

@@ -17,6 +17,7 @@ CS_Thermistor.asm
 CS_Thermoplie_Sensor.asm
 CS_UART0.asm
 main.asm
+mtp.asm
 CS_34M98_Initialization.asm
 CS_34M98_Interrupt.asm
 CS_34M98_Peripheral.asm

@@ -120,7 +120,7 @@ F_Init_SOC:
 	;-----------------------------------------------------------------
 	;初始化串口
 	;-----------------------------------------------------------------	
-	call		F_Uart0_Init
+	;call		F_Uart0_Init
 	call		F_Uart1_Init
 	
 	;-----------------------------------------------------------------
@@ -576,7 +576,7 @@ F_Init_SOC:
 	movlf		1,R_SYS_A0					;延时0.5ms(@cpuclk=2MHz)
 	call		F_delay_1kclk	
 
-	bsf			LCDENR,LCDEN		;使能LCD		
+	bcf			LCDENR,LCDEN		;使能LCD		
 
 	
 
@@ -627,7 +627,7 @@ F_Init_SOC:
 	movwf		RTCDWR 				;<Day> --> 星期		
 	
 	;-------------------------------
-	movlw		00110111b
+	movlw		00100110b
 	movwf		RTCCON				;RTCCON:(上电默认值为:0u000111)
 									;Bit7	LIR: 闰年指示寄存器(Read Only)
 									;	0 = 该年非闰年
@@ -640,8 +640,8 @@ F_Init_SOC:
 									;	1 = 选择24小时制*
 		
 									;Bit4	RTCEN: RTC使能控制
-									;	0 = RTC功能禁止			
-									;	1 = RTC功能使能*
+									;	0 = RTC功能禁止*			
+									;	1 = RTC功能使能
 	
 									;Bit3-0	INTEGER[3:0]: RTC 时钟补偿整数部分，每秒钟补偿一次
 									;默认值0111<详见Datasheet>
@@ -760,11 +760,11 @@ F_Init_IO:
 	;WAKEUP			= output/no-pull/high	 --> PT2.1  beep
 	;PT2.0			= input/no-pull/high    --> PT2.0 ble wakeup 输出低
 	;-------------------------------
-	MOVLW		00001111B			;PT2EN:(上电默认值:00000000)
+	MOVLW		00001011B			;PT2EN:(上电默认值:00000000)
 	MOVWF		PT2EN 				;	0 = 定义为输入口
 									;	1 = 定义为输出口	
 									
-	MOVLW		10110010B			;PT2PU:(上电默认值:00000000)
+	MOVLW		10110110B			;PT2PU:(上电默认值:00000000)
 	MOVWF		PT2PU				;	0 = 断开上拉电阻
 									;	1 = 使用上拉电阻
 									
