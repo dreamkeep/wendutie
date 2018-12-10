@@ -120,7 +120,7 @@ F_Init_SOC:
 	;-----------------------------------------------------------------
 	;初始化串口
 	;-----------------------------------------------------------------	
-	;call		F_Uart0_Init
+	call		F_Uart0_Init
 	call		F_Uart1_Init
 	
 	;-----------------------------------------------------------------
@@ -576,7 +576,7 @@ F_Init_SOC:
 	movlf		1,R_SYS_A0					;延时0.5ms(@cpuclk=2MHz)
 	call		F_delay_1kclk	
 
-	bcf			LCDENR,LCDEN		;使能LCD		
+	bsf			LCDENR,LCDEN		;使能LCD		
 
 	
 
@@ -627,7 +627,7 @@ F_Init_SOC:
 	movwf		RTCDWR 				;<Day> --> 星期		
 	
 	;-------------------------------
-	movlw		00100110b
+	movlw		00110111b
 	movwf		RTCCON				;RTCCON:(上电默认值为:0u000111)
 									;Bit7	LIR: 闰年指示寄存器(Read Only)
 									;	0 = 该年非闰年
@@ -640,8 +640,8 @@ F_Init_SOC:
 									;	1 = 选择24小时制*
 		
 									;Bit4	RTCEN: RTC使能控制
-									;	0 = RTC功能禁止*			
-									;	1 = RTC功能使能
+									;	0 = RTC功能禁止			
+									;	1 = RTC功能使能*
 	
 									;Bit3-0	INTEGER[3:0]: RTC 时钟补偿整数部分，每秒钟补偿一次
 									;默认值0111<详见Datasheet>

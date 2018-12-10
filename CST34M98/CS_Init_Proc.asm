@@ -215,16 +215,16 @@ f_seneor_get_ain23_ad:
 f_sensor_err_check:
 	bcf      R_Flag_Sys,B_Sensor_err
 	
-	movlw    0x10
+	movlw    0x00
 	addwf    r_short_ad_l,0
-	movwf    R_TEMP0
+	movwf    R_SYS_A0
 	movlw    0x00
 	addwfc   r_short_ad_m,0
-	movwf    R_TEMP1
+	movwf    R_SYS_A1
 	movlw    0x00
 	addwfc   r_short_ad_h,0
-	movwf    R_TEMP2              ;R_TEMP2/1/0 = r_short_ad_h/m/l + δ
-		
+	movwf    R_SYS_A2              ;R_TEMP2/1/0 = r_short_ad_h/m/l + δ
+
  check_ain23:	
 	movfw    r_ain23_ad_l
 	subwf    R_TEMP0,0
@@ -232,21 +232,22 @@ f_sensor_err_check:
 	subwfc   R_TEMP1,0
 	movfw    r_ain23_ad_h
 	subwfc   R_TEMP2,0
-	btfss    status,c           ;R_TEMP2/1/0 - ain23 
+	btfss    status,c           ;R_SYS_A2/1/0 - ain23 
 	goto     check_ain01
 	bsf      R_Flag_Sys,B_Sensor_err
 	return   
-	
+
  check_ain01:
     movfw    r_ain01_ad_l
-    subwf    R_TEMP0,0
+    subwf    R_SYS_A0,0
     movfw    r_ain01_ad_m
-    subwfc   R_TEMP1,0
+    subwfc   R_SYS_A1,0
     movfw    r_ain01_ad_h
-    subwfc   R_TEMP2,0           ;R_TEMP2/1/0 - ain01
+    subwfc   R_SYS_A2,0           ;R_SYS_A2/1/0 - ain01
     btfsc    status,c
     bsf      R_Flag_Sys,B_Sensor_err
 	return
+	
 	
 	
 	
@@ -290,25 +291,32 @@ f_close_int0:
 	bcf    inte,GIE  ;enable GIE 		
 return
 	
+/*
+pcl(gpio3) 2.5 pda(key) 2.4 
+beep 2.1
+mcu-rx 1.7 mcu-tx-1.6
+mcu-wk 2.0
+led 1.3 1.4
+*/
 f_sleep_init:
 	    ;IO设置
-		movlw      01111111b
+		movlw      10111111b
 		movwf      pt1en
 
-		movlw 	   00000000b  ;1.3 1.4 上拉电阻输出低
+		movlw 	   00000000b  ;1.3 1.4 断开上拉电阻输出低，
 		movwf 	   pt1pu
 
 		clrf       pt1
-		bsf        pt1,6  ;tx
+		bsf        pt1,7  ;tx
 		
-		movlw      11101011b
+		movlw      11001011b
 		movwf      pt2en
 
 		movlw      00110100b   ;2.2 2.4 上拉输入
 		movwf      pt2pu
 		
-        clrf       pt2
-        bsf        pt2,5  ;对应ble_status 输出高
+		movlw      00100001b
+		movwf      pt2      ;2.5对应ble_status 输出高 2.4断开上拉输出低 2.0输入低 beep输入
         
 		movlw      0xff
 		movwf      pt3en

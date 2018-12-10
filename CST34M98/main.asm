@@ -306,7 +306,7 @@ main_pre:
   no_cal_temp_mode:
     call     f_seneor_get_short_ad;判断传感器开路、短路 f_...
     call     f_seneor_get_ain01_ad
-    call     f_seneor_get_ain23_ad
+    call     f_seneor_get_ain23_ad ;@@@@@@@@@@@@@@@@@@@@@@@
     call     f_sensor_err_check   
 	btfss    R_Flag_Sys,B_Sensor_err
 	goto     banding_func_judge
@@ -439,11 +439,10 @@ test_temp_pre_pre_pre_close_tim:
  test_temp_pre_pre_pre_pre_loop:
     call     f_seneor_get_short_ad;判断传感器开路、短路 f_...
     call     f_seneor_get_ain01_ad
-    call     f_seneor_get_ain23_ad
+    call     f_seneor_get_ain23_ad;@@@@@@@@@@@@@@
     call     f_sensor_err_check
 	btfss    R_Flag_Sys,B_Sensor_err
 	goto     test_temp_pre_pre_pre_pre
-	;bcf      tm0con,T0EN   
 	call     f_ble_send_sensor_err;f发送错误信息到app
 	call     f_led_red      
 	movlw    200
@@ -529,12 +528,12 @@ test_temp_pre_pre_pre_pre:
        btfss    R_thermometer_FLAG,b_avoid_quilt
 	   goto     avoid_quilt_end
 	   
-	   call     f_seneor_get_ain01_ad ;f_seneor_get_ain23_ad;;采集12bitAD
+	   call     f_seneor_get_ain23_ad;f_seneor_get_ain01_ad;;;采集12bitAD     @@@@@@  ;
 	   bsf      R_thermometer_FLAG,b_temp_mode
 	   movff3	r_ain23_ad_l,R_NTC_ADCacheL	;保存AD  ;;计算温度
        movff3	r_ain23_ad_l,R_SYS_A0
 ;	   movff3	r_ain01_ad_l,R_NTC_ADCacheL	;保存AD  ;;计算温度
-;       movff3	r_ain01_ad_l,R_SYS_A0
+;      movff3	r_ain01_ad_l,R_SYS_A0
        call     F_TMSR_Rest_Count     ;;计算温度,先用计算电阻代替R_RestL/m/h
        call     f_adjust_measyre_res
        ;DEBUG
@@ -572,9 +571,9 @@ test_temp_pre_pre_pre_pre:
 	   goto    un_temp_std_lp
   un_temp_std_lp:  
 	   bcf     R_thermometer_FLAG,b_critical_temp ;;判断是否大于临界温度
-       movlw   low  320
+       movlw   low  220
 	   subwf   r_table_temp_l,0
-	   movlw   high 320
+	   movlw   high 220
 	   subwfc  r_table_temp_h,0
 	   btfsc   status,c    
 	   bsf     R_thermometer_FLAG,b_critical_temp
@@ -655,7 +654,6 @@ l_sleep_no_beep:
 	   call      f_no_led
 	   call      F_Ble_SleepCmd
 	   call      f_sleep_init  ;睡眠初始化
-;	   call      F_SOC_Sleep
 	   call      f_open_int0
 	   nop
 	   nop

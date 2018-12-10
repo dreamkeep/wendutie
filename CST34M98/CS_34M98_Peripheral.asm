@@ -133,7 +133,7 @@ F_SOC_Sleep:
 	bcf		WDTCON,0	
 	movlw	bbh
 	movwf	WDTIN		
-	bcf		WDTCON,WDTEN
+	bsf		WDTCON,WDTEN
 	
 	;---开启pt2.7按键中断用于按键唤醒
 ;	bcf		PTINT0,6

@@ -342,7 +342,6 @@ R_THERMISTOR_COUNT                   =00E1H
 R_THERMISTOR_POINTER                 =00E0H                                
 R_ALC_APPLICATION_E                  =00D9H                                
 R_ALC_APPLICATION_S                  =00D0H                                
-B_KEY_LONGPRESS_E                    =0005H                                
 B_KEY_LONGPRESS_S                    =0004H                                
 B_KEY_LONGPRESS                      =0003H                                
 B_KEY_PRESS_E                        =0002H                                

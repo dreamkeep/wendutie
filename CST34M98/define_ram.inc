@@ -108,7 +108,7 @@ R_KEY_F					equ   R_ALC_KEY_S+3     ;按键标志位
 	B_KEY_PRESS_E       equ     2				;按键短按弹起标志
 	B_KEY_LONGPRESS     equ     3				;按键长按住标志
 	B_KEY_LONGPRESS_S   equ     4				;按键刚长按下标志
-	B_KEY_LONGPRESS_E   equ     5				;按键长按弹起标志
+	;B_KEY_LONGPRESS_E   equ     5				;按键长按弹起标志
 
 ;--------------------------------------------
 ; 分配到CS_Application_Proc.asm的RAM地址和大小

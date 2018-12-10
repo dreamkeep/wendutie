@@ -24,6 +24,6 @@
 
 目标器件 :CSU18M88
 CodeOption  : CodeOption0:0xffff;CodeOption1:0xfffa;
-Checksum : 3CBD
+Checksum : 7655
 E:\bak\温度计\杭州世佳温度计项目资料\温度计DOME1.0\CST34M98\//main.asm
-共用程序空间 ：4089×16 bits ( 49.91% )
+共用程序空间 ：4090×16 bits ( 49.92% )
