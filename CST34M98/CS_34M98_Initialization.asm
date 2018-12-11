@@ -760,11 +760,11 @@ F_Init_IO:
 	;WAKEUP			= output/no-pull/high	 --> PT2.1  beep
 	;PT2.0			= input/no-pull/high    --> PT2.0 ble wakeup 输出低
 	;-------------------------------
-	MOVLW		00001011B			;PT2EN:(上电默认值:00000000)
+	MOVLW		00000011B			;PT2EN:(上电默认值:00000000)
 	MOVWF		PT2EN 				;	0 = 定义为输入口
 									;	1 = 定义为输出口	
 									
-	MOVLW		10110110B			;PT2PU:(上电默认值:00000000)
+	MOVLW		10111110B			;PT2PU:(上电默认值:00000000)
 	MOVWF		PT2PU				;	0 = 断开上拉电阻
 									;	1 = 使用上拉电阻
 									

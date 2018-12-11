@@ -30,7 +30,7 @@ include bt_config.inc
 ; program body
 ;============================================
 DEFINE			POWER_ON_KEY	"PT2,4"
-DEFINE			MODE_KEY		"PT2,2"
+DEFINE			MODE_KEY		"PT2,3"
 DEFINE			RED_LED		    "PT1,4"
 DEFINE			GREEN_LED		"PT1,3"
 DEFINE			BLE_STATUS	    "PT2,5" ;0 连接上  1 没有
@@ -134,6 +134,10 @@ reset:
 main_pre:
     call    F_TMSR_Init
     call    f_load_mtp_data
+    
+    ;call    F_Uart0_Init ;debug
+    
+
 ;	call    F_Thmpsr_ADShort_Init
 ;	movlw   3
 ;	call    f_waste_n_ad

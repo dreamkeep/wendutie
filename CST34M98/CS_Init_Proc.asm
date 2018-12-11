@@ -214,36 +214,90 @@ f_seneor_get_ain23_ad:
 	
 f_sensor_err_check:
 	bcf      R_Flag_Sys,B_Sensor_err
-	
-	movlw    0x00
+	;debug
+;	movlw   0x5A
+;    call    F_Uart0_Send_Byte
+;    
+;	movfw   r_short_ad_h
+;    call    F_Uart0_Send_Byte
+;	movfw   r_short_ad_m
+;    call    F_Uart0_Send_Byte    
+;	movfw   r_short_ad_l
+;    call    F_Uart0_Send_Byte  
+;    
+;	movfw   r_ain23_ad_h
+;    call    F_Uart0_Send_Byte
+;	movfw   r_ain23_ad_m
+;    call    F_Uart0_Send_Byte    
+;	movfw   r_ain23_ad_l
+;    call    F_Uart0_Send_Byte  
+;    
+;	movfw   r_ain01_ad_h
+;    call    F_Uart0_Send_Byte
+;	movfw   r_ain01_ad_m
+;    call    F_Uart0_Send_Byte    
+;	movfw   r_ain01_ad_l
+;    call    F_Uart0_Send_Byte  
+;    
+; 	movlw   0xA5
+;    call    F_Uart0_Send_Byte   
+    ;debug
+    
+	movlw    0x10
 	addwf    r_short_ad_l,0
 	movwf    R_SYS_A0
+	
 	movlw    0x00
 	addwfc   r_short_ad_m,0
 	movwf    R_SYS_A1
-	movlw    0x00
+	
+	movlw    0x80
 	addwfc   r_short_ad_h,0
-	movwf    R_SYS_A2              ;R_TEMP2/1/0 = r_short_ad_h/m/l + ¦Ä
+	movwf    R_SYS_A2              ;R_SYS_A2/1/0 = r_short_ad_h/m/l + 0x800000 + ¦Ä
  
+	movlw    0x00
+	addwf    r_ain23_ad_l,0
+	movwf    R_SYS_B0
+	
+	movlw    0x00
+	addwfc   r_ain23_ad_m,0
+	movwf    R_SYS_B1
+	
+	movlw    0x80
+	addwfc   r_ain23_ad_h,0
+	movwf    R_SYS_B2             ;R_SYS_B2/1/0 = r_ain23_ad_h/m/l + 0x800000
+	
+	movlw    0x00
+	addwf    r_ain01_ad_l,0
+	movwf    R_SYS_C0
+	
+	movlw    0x00
+	addwfc   r_ain01_ad_m,0
+	movwf    R_SYS_C1
+	
+	movlw    0x80
+	addwfc   r_ain01_ad_h,0
+	movwf    R_SYS_C2            ;R_SYS_C2/1/0 = r_ain01_ad_h/m/l + 0x800000
+	
  check_ain23:	
-	movfw    r_ain23_ad_l
+	movfw    R_SYS_B0
 	subwf    R_SYS_A0,0
-	movfw    r_ain23_ad_m
+	movfw    R_SYS_B1
 	subwfc   R_SYS_A1,0
-	movfw    r_ain23_ad_h
+	movfw    R_SYS_B2
 	subwfc   R_SYS_A2,0
-	btfss    status,c           ;R_SYS_A2/1/0 - ain23 
+	btfss    status,c           ;R_SYS_A2/1/0 - R_SYS_B2(ain23)
 	goto     check_ain01
 	bsf      R_Flag_Sys,B_Sensor_err
 	return   
 
  check_ain01:
-    movfw    r_ain01_ad_l
+    movfw    R_SYS_C0
     subwf    R_SYS_A0,0
-    movfw    r_ain01_ad_m
+    movfw    R_SYS_C1
     subwfc   R_SYS_A1,0
-    movfw    r_ain01_ad_h
-    subwfc   R_SYS_A2,0           ;R_SYS_A2/1/0 - ain01
+    movfw    R_SYS_C2
+    subwfc   R_SYS_A2,0           ;R_SYS_A2/1/0 - R_SYS_C2(ain01)
     btfsc    status,c
     bsf      R_Flag_Sys,B_Sensor_err
 	return
