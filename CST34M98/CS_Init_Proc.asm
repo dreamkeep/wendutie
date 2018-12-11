@@ -224,14 +224,14 @@ f_sensor_err_check:
 	movlw    0x00
 	addwfc   r_short_ad_h,0
 	movwf    R_SYS_A2              ;R_TEMP2/1/0 = r_short_ad_h/m/l + ¦Ä
-
+ 
  check_ain23:	
 	movfw    r_ain23_ad_l
-	subwf    R_TEMP0,0
+	subwf    R_SYS_A0,0
 	movfw    r_ain23_ad_m
-	subwfc   R_TEMP1,0
+	subwfc   R_SYS_A1,0
 	movfw    r_ain23_ad_h
-	subwfc   R_TEMP2,0
+	subwfc   R_SYS_A2,0
 	btfss    status,c           ;R_SYS_A2/1/0 - ain23 
 	goto     check_ain01
 	bsf      R_Flag_Sys,B_Sensor_err

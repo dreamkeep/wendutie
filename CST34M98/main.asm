@@ -571,9 +571,9 @@ test_temp_pre_pre_pre_pre:
 	   goto    un_temp_std_lp
   un_temp_std_lp:  
 	   bcf     R_thermometer_FLAG,b_critical_temp ;;判断是否大于临界温度
-       movlw   low  220
+       movlw   low  320
 	   subwf   r_table_temp_l,0
-	   movlw   high 220
+	   movlw   high 320
 	   subwfc  r_table_temp_h,0
 	   btfsc   status,c    
 	   bsf     R_thermometer_FLAG,b_critical_temp
